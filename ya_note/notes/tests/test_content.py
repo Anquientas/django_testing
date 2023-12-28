@@ -37,7 +37,8 @@ class TestListNotes(TestCase):
         self.client.force_login(self.author_1)
         response = self.client.get(reverse('notes:list'))
         object_list = response.context['object_list']
-        self.assertNotEqual(object_list[0].author, self.author_2)
+        for object in object_list:
+            self.assertNotEqual(object.author, self.author_2)
 
     def test_object_is_note(self):
         self.client.force_login(self.author_1)
