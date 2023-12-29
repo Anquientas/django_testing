@@ -67,7 +67,7 @@ class TestRoutes(TestCase):
         for user, status in users_statuses:
             self.client.force_login(user)
             for name, args in urls:
-                with self.subTest(user=user, name=name):        
+                with self.subTest(user=user, name=name):
                     url = reverse(name, args=args)
                     response = self.client.get(url)
                     self.assertEqual(response.status_code, status)

@@ -3,7 +3,6 @@ import pytest
 from http import HTTPStatus
 
 from django.urls import reverse
-
 from pytest_django.asserts import assertRedirects
 
 
@@ -38,7 +37,7 @@ def test_page_news_availability_for_anonymous_user(client, news):
         ('news:delete', pytest.lazy_fixture('comment_id_for_args')),
     )
 )
-def test_pages_no_availability_for_anonymous_user(client, name, args):
+def test_pages_no_availability_for_anonymous_user(args, client, name):
     login_url = reverse('users:login')
     url = reverse(name, args=args)
     expected_url = f'{login_url}?next={url}'
@@ -54,7 +53,7 @@ def test_pages_no_availability_for_anonymous_user(client, name, args):
     'name',
     ('news:edit', 'news:delete')
 )
-def test_pages_availability_for_author(author_client, name, comment):
+def test_pages_availability_for_author(author_client, comment, name):
     url = reverse(name, args=(comment.id,))
 
     # Act
@@ -68,7 +67,7 @@ def test_pages_availability_for_author(author_client, name, comment):
     'name',
     ('news:edit', 'news:delete')
 )
-def test_pages_no_availability_for_reader(reader_client, name, comment):
+def test_pages_no_availability_for_reader(comment, name, reader_client):
     url = reverse(name, args=(comment.id,))
 
     # Act

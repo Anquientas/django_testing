@@ -1,13 +1,11 @@
 import pytest
 
-from django.urls import reverse
-
-from news.models import Comment
-
-
 from http import HTTPStatus
 
+from django.urls import reverse
+
 from news.forms import BAD_WORDS, WARNING
+from news.models import Comment
 
 
 @pytest.mark.django_db
@@ -21,7 +19,7 @@ def test_not_availability_create_comment_for_anonymous_client(client, news):
 
 
 @pytest.mark.django_db
-def test_availability_create_comment_for_user(reader_client, news):
+def test_availability_create_comment_for_user(news, reader_client):
     url = reverse('news:detail', args=(news.id,))
 
     # Act
@@ -31,15 +29,13 @@ def test_availability_create_comment_for_user(reader_client, news):
 
 
 @pytest.mark.django_db
-def test_by_bad_words(news, author_client):
+def test_by_bad_words(author_client, news):
     url = reverse('news:detail', args=(news.id,))
     bad_words_data = {'text': f'Текст, {BAD_WORDS[0]}, остаток текста'}
-    response = author_client.post(url, data=bad_words_data)
-    comments_count = Comment.objects.count()
 
     # Act
-
-    print(response.context['form'])
+    response = author_client.post(url, data=bad_words_data)
+    comments_count = Comment.objects.count()
 
     assert response.context['form'].errors['text'][0] == WARNING
     assert comments_count == 0
@@ -50,7 +46,7 @@ def test_by_bad_words(news, author_client):
     'name',
     ('news:edit', 'news:delete')
 )
-def test_pages_availability_for_author(author_client, name, comment):
+def test_pages_availability_for_author(author_client, comment, name):
     url = reverse(name, args=(comment.id,))
 
     # Act
@@ -64,7 +60,7 @@ def test_pages_availability_for_author(author_client, name, comment):
     'name',
     ('news:edit', 'news:delete')
 )
-def test_pages_no_availability_for_reader(reader_client, name, comment):
+def test_pages_no_availability_for_reader(comment, name, reader_client):
     url = reverse(name, args=(comment.id,))
 
     # Act

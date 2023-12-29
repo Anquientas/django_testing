@@ -1,10 +1,9 @@
 from http import HTTPStatus
+from pytils.translit import slugify
 
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
-
-from pytils.translit import slugify
 
 from notes.models import Note
 
@@ -22,6 +21,7 @@ class TestNoteCreation(TestCase):
         cls.author = User.objects.create(username='У. Черчиль')
         cls.auth_client = Client()
         cls.auth_client.force_login(cls.author)
+
         cls.create_url = reverse('notes:add')
         cls.form_data = {
             'title': cls.NOTE_TITLE,
@@ -98,7 +98,9 @@ class TestNoteEditAndDelete(TestCase):
         response = self.client_user.post(self.edit_url, data=self.form_data)
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
         self.note.refresh_from_db()
+        self.assertEqual(self.note.title, self.NOTE_TITLE)
         self.assertEqual(self.note.text, self.NOTE_TEXT)
+        self.assertEqual(self.note.slug, self.NOTE_SLUG)
 
     def test_user_cant_delete_note_of_another_user(self):
         response = self.client_user.delete(self.delete_url)

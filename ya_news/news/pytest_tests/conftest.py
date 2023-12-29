@@ -3,6 +3,11 @@ import pytest
 from news.models import Comment, News
 
 
+@pytest.fixture(autouse=True)
+def enable_db(db):
+    ...
+
+
 @pytest.fixture
 def author(django_user_model):
     return django_user_model.objects.create(username='Автор')
@@ -44,7 +49,6 @@ def comment(news, author):
     return comment
 
 
-@pytest.mark.django_db
 @pytest.fixture
 def comment_id_for_args(comment):
     return comment.id,

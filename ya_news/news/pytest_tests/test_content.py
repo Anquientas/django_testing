@@ -1,10 +1,9 @@
 import pytest
 
-from django.urls import reverse
-
 from datetime import datetime, timedelta
 
 from django.conf import settings
+from django.urls import reverse
 
 from news.models import Comment, News
 
@@ -12,7 +11,7 @@ from news.models import Comment, News
 # assert response.status_code != 200, response.context['form'].errors
 @pytest.mark.django_db
 def test_vount_news_on_home_page(client):
-    all_news = [
+    [
         News.objects.create(
             title='Заголовок',
             text='Текст заметки',
@@ -31,7 +30,7 @@ def test_vount_news_on_home_page(client):
 
 @pytest.mark.django_db
 def test_sort_news_on_home_page(client):
-    all_news = [
+    [
         News.objects.create(
             title='Заголовок',
             text='Текст заметки',
@@ -50,9 +49,8 @@ def test_sort_news_on_home_page(client):
 
 
 @pytest.mark.django_db
-def test_sort_comments(client, news, author):
-
-    comments = [
+def test_sort_comments(author, client, news):
+    [
         Comment.objects.create(
             news=news,
             author=author,
@@ -83,7 +81,7 @@ def test_anonymous_client_has_no_form(client, news):
 
 
 @pytest.mark.django_db
-def test_authorized_client_has_form(reader_client, news):
+def test_authorized_client_has_form(news, reader_client):
     url = reverse('news:detail', args=(news.id,))
 
     # Act
