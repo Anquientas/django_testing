@@ -1,40 +1,89 @@
 from http import HTTPStatus
-from pytils.translit import slugify
 
+from pytils.translit import slugify
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from notes.models import Note
+from .urls import (
+    NOTES_ADD,
+    NOTES_DELETE,
+    NOTES_DETAIL,
+    NOTES_EDIT,
+    NOTES_HOME,
+    NOTES_LIST,
+    NOTES_SUCCESS,
+    USERS_LOGIN,
+    USERS_LOGOUT,
+    USERS_SIGNUP
+)
 
 
 User = get_user_model()
 
 
-class TestNoteCreation(TestCase):
-    NOTE_TITLE = 'Заголовок'
-    NOTE_TEXT = 'Просто текст.'
-    NOTE_SLUG = ''
+class GlobalClass(TestCase):
+
+    NOTE_SLUG = 'Slug'
+    NOTE_SLUG_NEW = 'New_slug'
 
     @classmethod
     def setUpTestData(cls):
         cls.author = User.objects.create(username='У. Черчиль')
-        cls.auth_client = Client()
-        cls.auth_client.force_login(cls.author)
+        cls.client_author = Client()
+        cls.client_author.force_login(user=cls.author)
+
+        cls.user = User.objects.create(username='Читатель заметки')
+        cls.client_user = Client()
+        cls.client_user.force_login(user=cls.user)
+
+        cls.note = Note.objects.create(
+            title='Заголовок',
+            text='Просто текст.',
+            slug=cls.SLUG,
+            author=cls.author,
+        )
+
+        cls.form_data = {
+            'title': 'Новый заголовок',
+            'text': 'Просто новый текст.',
+            'slug': cls.SLUG_NEW,
+        }
 
         cls.create_url = reverse('notes:add')
-        cls.form_data = {
-            'title': cls.NOTE_TITLE,
-            'text': cls.NOTE_TEXT,
-            'slug': cls.NOTE_SLUG,
-        }
+        cls.delete_url = reverse('notes:delete', args=(cls.note.slug,))
+        cls.edit_url = reverse('notes:edit', args=(cls.note.slug,))
+        cls.success_url = reverse('notes:success', args=None)
+        
+
+
+
+
+
+
+
+
+class TestNoteCreation(GlobalClass): #, TestCase):
+    # @classmethod
+    # def setUpTestData(cls):
+    #     cls.author = User.objects.create(username='У. Черчиль')
+    #     cls.auth_client = Client()
+    #     cls.auth_client.force_login(cls.author)
+
+    #     cls.create_url = reverse('notes:add')
+    #     cls.form_data = {
+    #         'title': 'Заголовок',
+    #         'text': 'Просто текст.',
+    #         'slug': ''
+    #     }
 
     def test_anonymous_user_cant_create_note(self):
         self.client.post(self.create_url, data=self.form_data)
         notes_count = Note.objects.count()
         self.assertEqual(notes_count, 0)
 
-    def test_user_can_create_comment(self):
+    def test_user_can_create_note(self):
         self.auth_client.post(self.create_url, data=self.form_data)
         notes_count = Note.objects.count()
         self.assertEqual(notes_count, 1)

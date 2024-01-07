@@ -36,15 +36,15 @@ class TestListNotes(TestCase):
     def test_notes_one_author(self):
         self.client.force_login(self.author_1)
         response = self.client.get(reverse('notes:list'))
-        object_list = response.context['object_list']
-        for object in object_list:
-            self.assertNotEqual(object.author, self.author_2)
+        notes = response.context['object_list']
+        for note in notes:
+            self.assertNotEqual(note.author, self.author_2)
 
     def test_object_in_list_objects_is_note(self):
         self.client.force_login(self.author_1)
         response = self.client.get(reverse('notes:list'))
-        object_list = response.context['object_list']
-        self.assertIsInstance(object_list[0], Note)
+        notes = response.context['object_list']
+        self.assertIsInstance(notes[0], Note)
 
 
 class TestDetailPage(TestCase):
@@ -63,7 +63,7 @@ class TestDetailPage(TestCase):
             ('notes:edit', (cls.note.slug,)),
         ]
 
-    def test_form_unclude_page(self):
+    def test_form_include_page(self):
         self.client.force_login(self.author)
         for name, args in self.urls:
             with self.subTest(name=name):
