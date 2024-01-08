@@ -1,8 +1,14 @@
+from datetime import datetime, timedelta
+
+from django.conf import settings
 from django.test import Client
 from django.urls import reverse
 import pytest
 
 from news.models import Comment, News
+
+
+COUNT_COMMENTS = 222
 
 
 @pytest.fixture(autouse=True)
@@ -48,12 +54,37 @@ def news():
 
 
 @pytest.fixture
+def several_news():
+    return [
+        News.objects.create(
+            title='Заголовок',
+            text='Текст заметки',
+            date=datetime.today() - timedelta(days=index)
+        )
+        for index in range(settings.NEWS_COUNT_ON_HOME_PAGE + 1)
+    ]
+
+
+@pytest.fixture
 def comment(news, author):
     return Comment.objects.create(
         news=news,
         author=author,
         text='Текст комментария',
     )
+
+
+@pytest.fixture
+def several_comments(news, author):
+    return [
+        Comment.objects.create(
+            news=news,
+            author=author,
+            text='Текст комментария',
+            created=datetime.today() - timedelta(days=index)
+        )
+        for index in range(COUNT_COMMENTS)
+    ]
 
 
 # @pytest.fixture
@@ -74,6 +105,10 @@ def COMMENT_PK(comment):
 @pytest.fixture
 def NEWS_HOME():
     return reverse('news:home')
+
+
+# @pytest.fixture
+# NEWS_HOME = reverse('news:home')
 
 
 @pytest.fixture
