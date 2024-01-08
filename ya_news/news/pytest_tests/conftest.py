@@ -17,6 +17,41 @@ def enable_db(db):
 
 
 @pytest.fixture
+def comment_delete(comment):
+    return reverse('news:delete', args=(comment.id,))
+
+
+@pytest.fixture
+def news_detail(news):
+    return reverse('news:detail', args=(news.id,))
+
+
+@pytest.fixture
+def comment_edit(comment):
+    return reverse('news:edit', args=(comment.id,))
+
+
+@pytest.fixture
+def news_home():
+    return reverse('news:home')
+
+
+@pytest.fixture
+def users_login():
+    return reverse('users:login')
+
+
+@pytest.fixture
+def users_logout():
+    return reverse('users:logout')
+
+
+@pytest.fixture
+def users_signup():
+    return reverse('users:signup')
+
+
+@pytest.fixture
 def author(django_user_model):
     return django_user_model.objects.create(username='Автор')
 
@@ -85,67 +120,3 @@ def several_comments(news, author):
         )
         for index in range(COUNT_COMMENTS)
     ]
-
-
-# @pytest.fixture
-# def comment_id_for_args(comment):
-#     return comment.id,
-
-
-@pytest.fixture
-def NEWS_PK(news):
-    return news.id
-
-
-@pytest.fixture
-def COMMENT_PK(comment):
-    return comment.id
-
-
-@pytest.fixture
-def NEWS_HOME():
-    return reverse('news:home')
-
-
-# @pytest.fixture
-# NEWS_HOME = reverse('news:home')
-
-
-@pytest.fixture
-def NEWS_DETAIL(NEWS_PK):
-    return reverse('news:detail', args=(NEWS_PK,))
-
-
-@pytest.fixture
-def COMMENT_DELETE(COMMENT_PK):
-    return reverse('news:delete', args=(COMMENT_PK,))
-
-
-@pytest.fixture
-def COMMENT_EDIT(COMMENT_PK):
-    return reverse('news:edit', args=(COMMENT_PK,))
-
-
-# NEWS_HOME = reverse('news:home')
-# NEWS_DETAIL = reverse('news:detail', args=(NEWS_PK,))
-# COMMENT_DELETE = reverse('news:delete', args=(COMMENT_PK,))
-# COMMENT_EDIT = reverse('news:edit', args=(COMMENT_PK,))
-
-# USERS_LOGIN = reverse('users:login')
-# USERS_LOGOUT = reverse('users:logout')
-# USERS_SIGNUP = reverse('users:signup')
-
-
-@pytest.fixture
-def USERS_LOGIN():
-    return reverse('users:login')
-
-
-@pytest.fixture
-def USERS_LOGOUT():
-    return reverse('users:logout')
-
-
-@pytest.fixture
-def USERS_SIGNUP():
-    return reverse('users:signup')
