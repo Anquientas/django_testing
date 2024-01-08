@@ -1,7 +1,5 @@
-from django.contrib.auth import get_user_model
-from django.test import Client, TestCase
-
 from notes.models import Note
+from .overall import Overall
 from .urls import (
     NOTE_SLUG,
     NOTES_ADD,
@@ -10,33 +8,11 @@ from .urls import (
 )
 
 
-User = get_user_model()
-
-
-class Global(TestCase):
+class Base(Overall):
 
     @classmethod
     def setUpTestData(cls):
-        cls.author = User.objects.create(username='У. Черчиль')
-        cls.client_author = Client()
-        cls.client_author.force_login(user=cls.author)
-
-        cls.author_2 = User.objects.create(username='А. Веллингтон')
-        cls.client_author_2 = Client()
-        cls.client_author_2.force_login(user=cls.author_2)
-
-        cls.reader = User.objects.create(username='Читатель заметки')
-        cls.reader_client = Client()
-        cls.reader_client.force_login(user=cls.reader)
-
-        cls.anonymous_client = Client()
-
-        cls.note = Note.objects.create(
-            title='Заголовок',
-            text='Просто текст.',
-            slug=NOTE_SLUG,
-            author=cls.author,
-        )
+        Overall.setUpTestData()
 
         all_notes = [
             Note(
@@ -50,14 +26,14 @@ class Global(TestCase):
                 title=f'Заголовок {index}',
                 text='Просто текст.',
                 slug=NOTE_SLUG + f'_{index}',
-                author=cls.author_2,
+                author=cls.reader,
             )
             for index in range(4)
         ]
         cls.notes = Note.objects.bulk_create(all_notes)
 
 
-class TestListNotes(Global, TestCase):
+class TestListNotes(Base):
 
     def test_notes_one_author(self):
         response = self.client_author.get(NOTES_LIST)
@@ -78,7 +54,7 @@ class TestListNotes(Global, TestCase):
         self.assertEqual(note.author, self.note.author)
 
 
-class TestDetailPage(Global, TestCase):
+class TestDetailPage(Base):
 
     def test_form_include_page(self):
         urls = (NOTES_ADD, NOTES_EDIT)

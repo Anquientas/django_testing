@@ -1,11 +1,11 @@
 from http import HTTPStatus
 
 from pytils.translit import slugify
-from django.contrib.auth import get_user_model
-from django.test import Client, TestCase
+from django.test import Client
 
 from notes.models import Note
 from notes.forms import WARNING
+from .overall import Overall
 from .urls import (
     NOTE_SLUG,
     NOTES_ADD,
@@ -15,29 +15,12 @@ from .urls import (
 )
 
 
-User = get_user_model()
-
-
-class GlobalClass(TestCase):
+class Base(Overall):
 
     @classmethod
     def setUpTestData(cls):
-        cls.author = User.objects.create(username='У. Черчиль')
-        cls.client_author = Client()
-        cls.client_author.force_login(user=cls.author)
-
-        cls.user = User.objects.create(username='Читатель заметки')
-        cls.client_user = Client()
-        cls.client_user.force_login(user=cls.user)
-
-        cls.anonymous_client = Client()
-
-        cls.note = Note.objects.create(
-            title='Заголовок INITIAL',
-            text='Просто текст INITIAL.',
-            slug=NOTE_SLUG,
-            author=cls.author,
-        )
+        Overall.setUpTestData()
+        cls.client_anonymous = Client()
 
         cls.form_data = {
             'title': 'Заголовок',
@@ -58,17 +41,17 @@ class GlobalClass(TestCase):
         }
 
         cls.form_repeat_data = {
-            'title': 'Заголовок INITIAL-NEW',
-            'text': 'Просто текст INITIAL-NEW.',
+            'title': 'Заголовок INITIAL',
+            'text': 'Просто текст INITIAL.',
             'slug': NOTE_SLUG,
         }
 
 
-class TestNoteCreation(GlobalClass, TestCase):
+class TestNoteCreation(Base):
 
     def test_anonymous_user_cant_create_note(self):
         self.assertEqual(
-            self.anonymous_client.post(
+            self.client_anonymous.post(
                 NOTES_ADD,
                 data=self.form_data
             ).status_code,
@@ -103,19 +86,19 @@ class TestNoteCreation(GlobalClass, TestCase):
         )
 
 
-class TestNoteEditAndDelete(GlobalClass, TestCase):
+class TestNoteEditAndDelete(Base):
 
     def test_user_cant_edit_note_of_another_user(self):
-        response = self.client_user.post(NOTES_EDIT, data=self.form_new_data)
+        response = self.client_reader.post(NOTES_EDIT, data=self.form_new_data)
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
         self.note.refresh_from_db()
         self.assertNotEqual(self.note.title, self.form_new_data['title'])
         self.assertNotEqual(self.note.text, self.form_new_data['text'])
         self.assertNotEqual(self.note.slug, self.form_new_data['slug'])
-        self.assertNotEqual(self.note.author, self.user)
+        self.assertNotEqual(self.note.author, self.client_reader)
 
     def test_user_cant_delete_note_of_another_user(self):
-        response = self.client_user.delete(NOTES_DELETE)
+        response = self.client_reader.delete(NOTES_DELETE)
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
         self.assertNotEqual(Note.objects.filter(slug=NOTE_SLUG).first(), None)
 
