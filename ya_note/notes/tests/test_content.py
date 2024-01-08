@@ -1,71 +1,99 @@
 from django.contrib.auth import get_user_model
-from django.test import TestCase
-from django.urls import reverse
+from django.test import Client, TestCase
 
 from notes.models import Note
+from .urls import (
+    NOTE_SLUG,
+    NOTES_ADD,
+    NOTES_EDIT,
+    NOTES_LIST,
+)
 
 
 User = get_user_model()
 
 
-class TestListNotes(TestCase):
+class Global(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.author_1 = User.objects.create(username='У. Черчиль')
+        cls.author = User.objects.create(username='У. Черчиль')
+        cls.client_author = Client()
+        cls.client_author.force_login(user=cls.author)
+
         cls.author_2 = User.objects.create(username='А. Веллингтон')
+        cls.client_author_2 = Client()
+        cls.client_author_2.force_login(user=cls.author_2)
+
+        cls.reader = User.objects.create(username='Читатель заметки')
+        cls.reader_client = Client()
+        cls.reader_client.force_login(user=cls.reader)
+
+        cls.anonymous_client = Client()
+
+        cls.note = Note.objects.create(
+            title='Заголовок',
+            text='Просто текст.',
+            slug=NOTE_SLUG,
+            author=cls.author,
+        )
 
         all_notes = [
             Note(
                 title=f'Заголовок {index}',
                 text='Просто текст.',
-                slug=f'Slug_{index}',
-                author=cls.author_1,
+                slug=NOTE_SLUG + f'_{index}',
+                author=cls.author,
             )
             if index % 2 == 1 else
             Note(
                 title=f'Заголовок {index}',
                 text='Просто текст.',
-                slug=f'Slug_{index}',
+                slug=NOTE_SLUG + f'_{index}',
                 author=cls.author_2,
             )
             for index in range(4)
         ]
         cls.notes = Note.objects.bulk_create(all_notes)
 
+
+class TestListNotes(Global, TestCase):
+
     def test_notes_one_author(self):
-        self.client.force_login(self.author_1)
-        response = self.client.get(reverse('notes:list'))
+        response = self.client_author.get(NOTES_LIST)
         notes = response.context['object_list']
-        for note in notes:
-            self.assertNotEqual(note.author, self.author_2)
+        self.assertIn(self.note, notes)
+        note = notes.get(slug=NOTE_SLUG)
+        self.assertEqual(note.title, self.note.title)
+        self.assertEqual(note.text, self.note.text)
+        self.assertEqual(note.author, self.note.author)
 
     def test_object_in_list_objects_is_note(self):
-        self.client.force_login(self.author_1)
-        response = self.client.get(reverse('notes:list'))
+        response = self.client_author.get(NOTES_LIST)
         notes = response.context['object_list']
-        self.assertIsInstance(notes[0], Note)
+        self.assertIn(self.note, notes)
+        note = notes.get(slug=NOTE_SLUG)
+        self.assertEqual(note.title, self.note.title)
+        self.assertEqual(note.text, self.note.text)
+        self.assertEqual(note.author, self.note.author)
 
 
-class TestDetailPage(TestCase):
-
-    @classmethod
-    def setUpTestData(cls):
-        cls.author = User.objects.create(username='У. Черчиль')
-        cls.note = Note.objects.create(
-            title='Заголовок',
-            text='Просто текст.',
-            slug='Slug',
-            author=cls.author,
-        )
-        cls.urls = [
-            ('notes:add', None),
-            ('notes:edit', (cls.note.slug,)),
-        ]
+class TestDetailPage(Global, TestCase):
 
     def test_form_include_page(self):
-        self.client.force_login(self.author)
-        for name, args in self.urls:
-            with self.subTest(name=name):
-                response = self.client.get(reverse(name, args=args))
-                self.assertIn('form', response.context)
+        urls = (NOTES_ADD, NOTES_EDIT)
+        for url in urls:
+            with self.subTest(url=url):
+                self.assertIn('form', self.client_author.get(url).context)
+                self.assertIn(
+                    'title',
+                    self.client_author.get(url).context['form'].fields.keys()
+                )
+                self.assertIn(
+                    'text',
+                    self.client_author.get(url).context['form'].fields.keys()
+                )
+                self.assertIn(
+                    'slug',
+                    self.client_author.get(url).context['form'].fields.keys()
+                )
