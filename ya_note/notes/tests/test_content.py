@@ -1,5 +1,5 @@
 from notes.models import Note
-from .overall import Overall
+from .base import Overall
 from .urls import (
     NOTE_SLUG,
     NOTES_ADD,

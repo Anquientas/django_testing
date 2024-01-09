@@ -3,10 +3,10 @@ from http import HTTPStatus
 from pytils.translit import slugify
 from django.test import Client
 
-from notes.models import Note
 from notes.forms import WARNING
-from .overall import Overall
-from .urls import (
+from notes.models import Note
+from .base import (
+    BaseTestCase,
     NOTE_SLUG,
     NOTES_ADD,
     NOTES_DELETE,
@@ -14,12 +14,14 @@ from .urls import (
     NOTES_SUCCESS,
 )
 
+from django.db.models import Q
 
-class Base(Overall):
+
+class TestNoteCreation(BaseTestCase):
 
     @classmethod
     def setUpTestData(cls):
-        Overall.setUpTestData()
+        BaseTestCase.setUpTestData()
         cls.client_anonymous = Client()
 
         cls.form_data = {
@@ -46,9 +48,6 @@ class Base(Overall):
             'slug': NOTE_SLUG,
         }
 
-
-class TestNoteCreation(Base):
-
     def test_anonymous_user_cant_create_note(self):
         self.assertEqual(
             self.client_anonymous.post(
@@ -57,13 +56,17 @@ class TestNoteCreation(Base):
             ).status_code,
             HTTPStatus.FOUND
         )
+        self.assertEqual(Note.objects.count(), 1)
 
     def test_user_can_create_note(self):
         self.client_author.post(NOTES_ADD, data=self.form_data)
-        note = Note.objects.filter(slug=self.form_data['slug']).first()
-        self.assertNotEqual(note, None)
+        # note = Note.objects.filter(slug=self.form_data['slug']).first()
+        note = Note.objects.filter(Q(author=self.author) & ~Q(slug=NOTE_SLUG))
+        # self.assertNotEqual(note, None)
+        self.assertCountEqual(note, 1)
         self.assertEqual(note.title, self.form_data['title'])
         self.assertEqual(note.text, self.form_data['text'])
+        self.assertEqual(note.slug, self.form_data['slug'])
         self.assertEqual(note.author, self.author)
 
     def test_slug_is_not_none(self):

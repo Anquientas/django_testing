@@ -2,7 +2,7 @@ from http import HTTPStatus
 
 from django.test import Client
 
-from .overall import Overall
+from .base import Overall
 from .urls import (
     NOTES_ADD,
     NOTES_DELETE,
