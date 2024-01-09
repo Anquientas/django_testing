@@ -89,45 +89,16 @@ def news():
 
 
 @pytest.fixture
-def several_news(author):
-    return [
-        News.objects.create(
+def several_news():
+    return News.objects.bulk_create(
+        News(
             title='Заголовок',
             text='Текст заметки',
             date=datetime.today() - timedelta(days=index)
         )
         for index in range(settings.NEWS_COUNT_ON_HOME_PAGE + 1)
-    ]
+    )
 
-    # return News.objects.bulk_create(
-    #     News(
-    #         title='Заголовок',
-    #         text='Текст заметки',
-    #         author=author,
-    #         date=datetime.today() - timedelta(days=index)
-    #     )
-    #     for index in range(settings.NEWS_COUNT_ON_HOME_PAGE + 1)
-    # )
-
-
-# cls.notes = Note.objects.bulk_create(all_notes)
-        # all_notes = [
-        #     Note(
-        #         title=f'Заголовок {index}',
-        #         text='Просто текст.',
-        #         slug=NOTE_SLUG + f'_{index}',
-        #         author=cls.author,
-        #     )
-        #     if index % 2 == 1 else
-        #     Note(
-        #         title=f'Заголовок {index}',
-        #         text='Просто текст.',
-        #         slug=NOTE_SLUG + f'_{index}',
-        #         author=cls.author_2,
-        #     )
-        #     for index in range(4)
-        # ]
-        # cls.notes = Note.objects.bulk_create(all_notes)
 
 @pytest.fixture
 def comment(news, author):
@@ -140,12 +111,12 @@ def comment(news, author):
 
 @pytest.fixture
 def several_comments(news, author):
-    return [
-        Comment.objects.create(
+    return Comment.objects.bulk_create(
+        Comment(
             news=news,
             author=author,
             text='Текст комментария',
             created=datetime.today() - timedelta(days=index)
         )
         for index in range(COUNT_COMMENTS)
-    ]
+    )
