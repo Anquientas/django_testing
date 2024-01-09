@@ -35,6 +35,8 @@ class BaseTestCase(TestCase):
         cls.client_reader = Client()
         cls.client_reader.force_login(user=cls.reader)
 
+        cls.client_anonymous = Client()
+
         cls.note = Note.objects.create(
             title='Заголовок',
             text='Просто текст.',

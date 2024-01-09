@@ -89,7 +89,7 @@ class TestNoteCreation(BaseTestCase):
         )
 
 
-class TestNoteEditAndDelete(Base):
+class TestNoteEditAndDelete(BaseTestCase):
 
     def test_user_cant_edit_note_of_another_user(self):
         response = self.client_reader.post(NOTES_EDIT, data=self.form_new_data)

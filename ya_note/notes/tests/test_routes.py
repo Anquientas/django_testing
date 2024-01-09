@@ -1,9 +1,7 @@
 from http import HTTPStatus
 
-from django.test import Client
-
-from .base import Overall
-from .urls import (
+from .base import (
+    BaseTestCase,
     NOTES_ADD,
     NOTES_DELETE,
     NOTES_DETAIL,
@@ -17,12 +15,7 @@ from .urls import (
 )
 
 
-class TestRoutes(Overall):
-
-    @classmethod
-    def setUpTestData(cls):
-        Overall.setUpTestData()
-        cls.client_anonymous = Client()
+class TestRoutes(BaseTestCase):
 
     def test_pages_availability_for_users(self):
         urls_client_statuses = (
@@ -41,22 +34,22 @@ class TestRoutes(Overall):
             (NOTES_DETAIL, self.client_reader, HTTPStatus.NOT_FOUND),
         )
 
-        for url, user, status in urls_client_statuses:
-            with self.subTest(url=url, user=user, expected_result=status):
-                self.assertEqual(user.get(url).status_code, status)
+        for url, client, status in urls_client_statuses:
+            with self.subTest(url=url, client=client, expected_result=status):
+                self.assertEqual(client.get(url).status_code, status)
 
     def test_redirect_for_anonymous_client(self):
-        urls = (
-            NOTES_ADD,
-            NOTES_LIST,
-            NOTES_SUCCESS,
-            NOTES_EDIT,
-            NOTES_DELETE,
-            NOTES_DETAIL,
+        urls_redirects = (
+            (NOTES_ADD, f'{USERS_LOGIN}?next={NOTES_ADD}'),
+            (NOTES_LIST, f'{USERS_LOGIN}?next={NOTES_LIST}'),
+            (NOTES_SUCCESS, f'{USERS_LOGIN}?next={NOTES_SUCCESS}'),
+            (NOTES_EDIT, f'{USERS_LOGIN}?next={NOTES_EDIT}'),
+            (NOTES_DELETE, f'{USERS_LOGIN}?next={NOTES_DELETE}'),
+            (NOTES_DETAIL, f'{USERS_LOGIN}?next={NOTES_DETAIL}'),
         )
-        for url in urls:
+        for url, redirect in urls_redirects:
             with self.subTest(url=url, expected_result=USERS_LOGIN):
                 self.assertRedirects(
                     self.client_anonymous.get(url),
-                    f'{USERS_LOGIN}?next={url}'
+                    redirect
                 )
