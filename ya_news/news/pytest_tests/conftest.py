@@ -17,38 +17,43 @@ def enable_db(db):
 
 
 @pytest.fixture
-def comment_delete(comment):
+def comment_delete_url(comment):
     return reverse('news:delete', args=(comment.id,))
 
 
 @pytest.fixture
-def news_detail(news):
+def news_detail_url(news):
     return reverse('news:detail', args=(news.id,))
 
 
 @pytest.fixture
-def comment_edit(comment):
+def comment_edit_url(comment):
     return reverse('news:edit', args=(comment.id,))
 
 
 @pytest.fixture
-def news_home():
+def news_home_url():
     return reverse('news:home')
 
 
 @pytest.fixture
-def users_login():
+def users_login_url():
     return reverse('users:login')
 
 
 @pytest.fixture
-def users_logout():
+def users_logout_url():
     return reverse('users:logout')
 
 
 @pytest.fixture
-def users_signup():
+def users_signup_url():
     return reverse('users:signup')
+
+
+@pytest.fixture
+def expected_url():
+    return '{redirect}?next={url}'
 
 
 @pytest.fixture
@@ -76,11 +81,6 @@ def client_reader(reader):
 
 
 @pytest.fixture
-def client_anonymous():
-    return Client()
-
-
-@pytest.fixture
 def news():
     return News.objects.create(
         title='Заголовок',
@@ -89,7 +89,7 @@ def news():
 
 
 @pytest.fixture
-def several_news():
+def several_news(author):
     return [
         News.objects.create(
             title='Заголовок',
@@ -99,6 +99,35 @@ def several_news():
         for index in range(settings.NEWS_COUNT_ON_HOME_PAGE + 1)
     ]
 
+    # return News.objects.bulk_create(
+    #     News(
+    #         title='Заголовок',
+    #         text='Текст заметки',
+    #         author=author,
+    #         date=datetime.today() - timedelta(days=index)
+    #     )
+    #     for index in range(settings.NEWS_COUNT_ON_HOME_PAGE + 1)
+    # )
+
+
+# cls.notes = Note.objects.bulk_create(all_notes)
+        # all_notes = [
+        #     Note(
+        #         title=f'Заголовок {index}',
+        #         text='Просто текст.',
+        #         slug=NOTE_SLUG + f'_{index}',
+        #         author=cls.author,
+        #     )
+        #     if index % 2 == 1 else
+        #     Note(
+        #         title=f'Заголовок {index}',
+        #         text='Просто текст.',
+        #         slug=NOTE_SLUG + f'_{index}',
+        #         author=cls.author_2,
+        #     )
+        #     for index in range(4)
+        # ]
+        # cls.notes = Note.objects.bulk_create(all_notes)
 
 @pytest.fixture
 def comment(news, author):
