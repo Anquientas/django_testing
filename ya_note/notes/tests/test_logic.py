@@ -1,7 +1,5 @@
 from http import HTTPStatus
 
-from django.test import Client
-
 from notes.forms import WARNING
 from notes.models import Note
 from .base import (
@@ -21,7 +19,6 @@ class TestNoteCreation(BaseTestCase):
     @classmethod
     def setUpTestData(cls):
         BaseTestCase.setUpTestData()
-        cls.client_anonymous = Client()
 
         cls.form_data = {
             'title': 'Заголовок',
