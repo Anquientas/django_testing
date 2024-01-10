@@ -34,12 +34,9 @@ class TestListNotes(BaseTestCase):
         )
 
     def test_notes_one_author(self):
-        response = self.client_author.get(NOTES_LIST)
-        notes = response.context['object_list']
+        notes = self.client_author.get(NOTES_LIST).context['object_list']
         self.assertIn(self.note, notes)
-        self.assertEqual(len(
-            Note.objects.filter(author=self.author, id=self.note.id)
-        ), 1)
+        self.assertEqual(list(notes).count(self.note), 1)
         note = notes.get(id=self.note.id)
         self.assertEqual(note.title, self.note.title)
         self.assertEqual(note.text, self.note.text)
@@ -58,7 +55,4 @@ class TestListNotes(BaseTestCase):
             with self.subTest(url=url):
                 context = self.client_author.get(url).context
                 self.assertIn('form', context)
-                self.assertIs(
-                    issubclass(type(context['form']), NoteForm),
-                    True
-                )
+                self.assertTrue(isinstance(context['form'], NoteForm))
