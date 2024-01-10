@@ -45,7 +45,7 @@ class BaseTestCase(TestCase):
         )
 
         cls.form_data = {
-            'title': 'Заголовок',
+            'title': 'Заголовок 1',
             'text': 'Просто текст.',
             'slug': 'Slug_1',
         }
