@@ -13,6 +13,13 @@ USERS_LOGIN = pytest.lazy_fixture('users_login_url')
 USERS_LOGOUT = pytest.lazy_fixture('users_logout_url')
 USERS_SIGNUP = pytest.lazy_fixture('users_signup_url')
 
+EXPECTED_URL_COMMENT_DELETE = pytest.lazy_fixture(
+    'expected_for_comment_delete_url'
+)
+EXPECTED_URL_COMMENT_EDIT = pytest.lazy_fixture(
+    'expected_for_comment_edit_url'
+)
+
 CLIENT_ANONYMOUS = pytest.lazy_fixture('client')
 CLIENT_AUTHOR = pytest.lazy_fixture('client_author')
 CLIENT_READER = pytest.lazy_fixture('client_reader')
@@ -37,17 +44,16 @@ def test_pages_availability_for_users(url, client_user, status):
 
 
 @pytest.mark.parametrize(
-    'url, client_user, redirect',
+    'url, client_user, expected_url',
     (
-        (COMMENT_EDIT, CLIENT_ANONYMOUS, USERS_LOGIN),
-        (COMMENT_DELETE, CLIENT_ANONYMOUS, USERS_LOGIN),
+        (COMMENT_EDIT, CLIENT_ANONYMOUS, EXPECTED_URL_COMMENT_EDIT),
+        (COMMENT_DELETE, CLIENT_ANONYMOUS, EXPECTED_URL_COMMENT_DELETE),
     )
 )
 def test_pages_no_availability_for_anonymous_user(url,
                                                   client_user,
-                                                  redirect,
                                                   expected_url):
     assertRedirects(
         client_user.get(url),
-        expected_url.format(redirect=redirect, url=url)
+        expected_url
     )

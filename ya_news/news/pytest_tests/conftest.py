@@ -52,8 +52,19 @@ def users_signup_url():
 
 
 @pytest.fixture
-def expected_url():
-    return '{redirect}?next={url}'
+def expected_for_comment_edit_url(comment_edit_url, users_login_url):
+    return '{redirect}?next={url}'.format(
+        redirect=users_login_url,
+        url=comment_edit_url
+    )
+
+
+@pytest.fixture
+def expected_for_comment_delete_url(comment_delete_url, users_login_url):
+    return '{redirect}?next={url}'.format(
+        redirect=users_login_url,
+        url=comment_delete_url
+    )
 
 
 @pytest.fixture
@@ -90,7 +101,7 @@ def news():
 
 @pytest.fixture
 def several_news():
-    return News.objects.bulk_create(
+    News.objects.bulk_create(
         News(
             title='Заголовок',
             text='Текст заметки',
@@ -111,12 +122,10 @@ def comment(news, author):
 
 @pytest.fixture
 def several_comments(news, author):
-    return Comment.objects.bulk_create(
-        Comment(
+    for index in range(COUNT_COMMENTS):
+        Comment.objects.create(
             news=news,
             author=author,
             text='Текст комментария',
             created=datetime.today() - timedelta(days=index)
         )
-        for index in range(COUNT_COMMENTS)
-    )
