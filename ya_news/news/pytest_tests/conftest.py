@@ -53,18 +53,12 @@ def users_signup_url():
 
 @pytest.fixture
 def expected_for_comment_edit_url(comment_edit_url, users_login_url):
-    return '{redirect}?next={url}'.format(
-        redirect=users_login_url,
-        url=comment_edit_url
-    )
+    return f'{users_login_url}?next={comment_edit_url}'
 
 
 @pytest.fixture
 def expected_for_comment_delete_url(comment_delete_url, users_login_url):
-    return '{redirect}?next={url}'.format(
-        redirect=users_login_url,
-        url=comment_delete_url
-    )
+    return f'{users_login_url}?next={comment_delete_url}'
 
 
 @pytest.fixture
