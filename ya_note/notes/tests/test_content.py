@@ -55,4 +55,4 @@ class TestListNotes(BaseTestCase):
             with self.subTest(url=url):
                 context = self.client_author.get(url).context
                 self.assertIn('form', context)
-                self.assertTrue(isinstance(context['form'], NoteForm))
+                self.assertIsInstance(context['form'], NoteForm)
