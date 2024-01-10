@@ -32,4 +32,4 @@ def test_anonymous_client_has_no_form(client, news_detail_url):
 def test_authorized_client_has_form(client_reader, news_detail_url):
     context = client_reader.get(news_detail_url).context
     assert 'form' in context
-    assert issubclass(type(context['form']), CommentForm) is True
+    assert isinstance(context['form'], CommentForm) is True
