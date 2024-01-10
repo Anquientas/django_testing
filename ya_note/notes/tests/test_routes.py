@@ -17,7 +17,7 @@ from .base import (
 
 class TestRoutes(BaseTestCase):
 
-    def test_pages_availability_for_users(self):
+    def test_pages_availability_for_clients(self):
         urls_client_statuses = (
             (NOTES_HOME, self.client_anonymous, HTTPStatus.OK),
             (USERS_LOGIN, self.client_anonymous, HTTPStatus.OK),

@@ -43,3 +43,27 @@ class BaseTestCase(TestCase):
             slug=NOTE_SLUG,
             author=cls.author,
         )
+
+        cls.form_data = {
+            'title': 'Заголовок',
+            'text': 'Просто текст.',
+            'slug': 'Slug_1',
+        }
+
+        cls.form_new_data = {
+            'title': 'Новый заголовок',
+            'text': 'Просто новый текст.',
+            'slug': 'New_slug',
+        }
+
+        cls.form_empty_data = {
+            'title': 'Заголовок EMPTY',
+            'text': 'Просто текст EMPTY.',
+            'slug': '',
+        }
+
+        cls.form_repeat_data = {
+            'title': 'Заголовок INITIAL',
+            'text': 'Просто текст INITIAL.',
+            'slug': NOTE_SLUG,
+        }
