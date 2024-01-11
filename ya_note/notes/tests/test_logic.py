@@ -6,7 +6,6 @@ from notes.forms import WARNING
 from notes.models import Note
 from .base import (
     BaseTestCase,
-    NOTE_SLUG,
     NOTES_ADD,
     NOTES_DELETE,
     NOTES_EDIT,
@@ -59,53 +58,42 @@ class TestNoteCreation(BaseTestCase):
         self.assertEqual(set(Note.objects.all()), notes)
 
     def test_client_cant_edit_note_of_another_client(self):
-        note_old = Note.objects.get(slug=NOTE_SLUG)
-        notes = set(Note.objects.all())
         response = self.client_reader.post(
             NOTES_EDIT,
             data=self.form_new_data
         )
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
-        self.assertEqual(set(Note.objects.all()), notes)
-        note = Note.objects.get(id=note_old.id)
-        self.assertEqual(note.title, note_old.title)
-        self.assertEqual(note.text, note_old.text)
-        self.assertEqual(note.author, note_old.author)
-        self.assertEqual(note.slug, note_old.slug)
+        note = Note.objects.get(id=self.note.id)
+        self.assertEqual(note.title, self.note.title)
+        self.assertEqual(note.text, self.note.text)
+        self.assertEqual(note.author, self.note.author)
+        self.assertEqual(note.slug, self.note.slug)
 
     def test_client_cant_delete_note_of_another_client(self):
-        notes = set(Note.objects.all())
-        note_old = Note.objects.get(slug=NOTE_SLUG)
         response = self.client_reader.delete(NOTES_DELETE)
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
-        self.assertEqual(set(Note.objects.all()), notes)
-        note = Note.objects.get(id=note_old.id)
-        self.assertEqual(note.title, note_old.title)
-        self.assertEqual(note.text, note_old.text)
-        self.assertEqual(note.author, note_old.author)
-        self.assertEqual(note.slug, note_old.slug)
+        self.assertTrue(Note.objects.filter(id=self.note.id).exists())
+        note = Note.objects.get(id=self.note.id)
+        self.assertEqual(note.title, self.note.title)
+        self.assertEqual(note.text, self.note.text)
+        self.assertEqual(note.author, self.note.author)
+        self.assertEqual(note.slug, self.note.slug)
 
     def test_author_can_edit_note(self):
-        note_id = set(
-            Note.objects.filter(slug=NOTE_SLUG).values_list('id', flat=True)
-        ).pop()
         response = self.client_author.post(
             NOTES_EDIT,
             data=self.form_new_data
         )
         self.assertRedirects(response, NOTES_SUCCESS)
-        note = Note.objects.get(id=note_id)
+        note = Note.objects.get(id=self.note.id)
         self.assertEqual(note.title, self.form_new_data['title'])
         self.assertEqual(note.text, self.form_new_data['text'])
         self.assertEqual(note.author, self.note.author)
         self.assertEqual(note.slug, self.form_new_data['slug'])
 
     def test_author_can_delete_note(self):
-        note_id = set(
-            Note.objects.filter(slug=NOTE_SLUG).values_list('id', flat=True)
-        ).pop()
         notes_count = Note.objects.count()
         response = self.client_author.delete(NOTES_DELETE)
         self.assertRedirects(response, NOTES_SUCCESS)
         self.assertEqual(notes_count - Note.objects.count(), 1)
-        self.assertFalse(Note.objects.filter(id=note_id).exists())
+        self.assertFalse(Note.objects.filter(id=self.note.id).exists())
